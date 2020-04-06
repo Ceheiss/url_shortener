@@ -3,17 +3,14 @@ const app = express();
 const port = process.env.PORT || 3001;
 const cors = require("cors");
 const mongoose = require("mongoose");
-const dns = require("dns");
+const bodyParser = require("body-parser");
+
+const {
+  urlValidityChecker,
+  isValidUrlFormat,
+  getUrlHost,
+} = require("./util/helpers");
 require("dotenv").config();
-
-const urlValidityCheckerr = (url) =>
-  dns.lookup(url, (err, address) =>
-    err
-      ? { error: console.log("invalid URL") }
-      : console.log(`${address} is valid`)
-  );
-
-urlValidityCheckerr("google.com");
 
 mongoose
   .connect(process.env.MONGO_URL, {
@@ -21,10 +18,11 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => console.log("Database Connected"))
-  .catch((err) => console.log(err));
+  .catch((err) => console.err(err));
 
 app.use(cors({ optionSuccessStatus: 200 }));
 app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Schema
 const Url = mongoose.model("Url", {
@@ -39,23 +37,58 @@ const Url = mongoose.model("Url", {
   },
 });
 
-// We create an instance of it
-const firstUrl = new Url({ original_url: "www.google.com", short_url: 1 });
+// app.get('/kill', async (req, res) =>{
+//   await Url.deleteOne({ short_url: 5 })
+//   Url.find({})
+//     .then((urls) => console.log(urls, urls.length))
+//     .catch((e) => console.log(e));
+// })
 
 // And saving the instance on the db
 app.get("/", (req, res) => {
-  // firstUrl
-  //   .save()
-  //   .then(() => {
-  //     console.log(firstUrl);
-  //   })
-  //   .catch((err) => {
-  //     console.log("Error: ", err);
-  //   });
   Url.find({})
-    .then((urls) => console.log(urls))
+    .then((urls) => console.log(urls, urls.length))
     .catch((e) => console.log(e));
   res.sendFile(__dirname + "/views/index.html");
+});
+
+app.post("/api/shorturl/new", async (req, res) => {
+  const enteredUrl = req.body.url;
+  if (!isValidUrlFormat(enteredUrl)) return res.json({ Error: "Invalid format" });
+  console.log("is Valid?: ", urlValidityChecker(enteredUrl))
+  if (urlValidityChecker(enteredUrl) !== "valid url")  return res.json({ Error: "Url doesn't exist" });
+  try {
+    const entries = await Url.find({});
+    const numberOfEntries = entries.length;
+    const postedUrl = await Url.find({ original_url: enteredUrl });
+    if (postedUrl.length > 0) {
+      res.send(postedUrl);
+    } else {
+      const newEntry = {
+        original_url: enteredUrl,
+        short_url: numberOfEntries + 1,
+      };
+      await Url.create(newEntry);
+      res.send(newEntry);
+    }
+  } catch (e) {
+    res.redirect("/");
+    console.log(e);
+  }
+});
+
+app.get("/gogo", (req, res) => {
+  Url.find({ original_url: "www.google.com" })
+    .then((url) => {
+      if (url.length > 0) {
+        res.send(url);
+      } else {
+        res.send("Shit aint found");
+      }
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 });
 
 /*
