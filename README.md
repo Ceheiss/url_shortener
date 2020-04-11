@@ -2,7 +2,7 @@
 
 ## User Story:
 
-1. I can POST a URL to [project_url]/api/shorturl/new and I will receive a shortened URL in the JSON response.
+1. I can POST a URL to https://ceheiss-url-shortener.glitch.me/api/shorturl/new and I will receive a shortened URL in the JSON response.
 Example : `{"original_url":"www.google.com","short_url":1}`
 
 2. If I pass an invalid URL that doesn't follow the `http(s)://www.example.com(/more/routes)` format, the JSON response will contain an error like `{"error":"invalid URL"}`
