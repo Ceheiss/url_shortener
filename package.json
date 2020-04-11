@@ -1,10 +1,10 @@
 {
-	"name": "url_shortener",
+	"name": "ceheiss_url_shortener",
 	"version": "0.0.1",
 	"description": "API project for freeCodeCamp",
 	"main": "server.js",
 	"scripts": {
-		"start": "node server.js",
+		"start": "node app.js",
 		"test": "jest"
 	},
 	"dependencies": {
@@ -12,10 +12,12 @@
 		"cors": "^2.8.1",
 		"dotenv": "^8.2.0",
 		"express": "^5.0.0-alpha.2",
-		"jest": "^25.2.7",
 		"mongodb": "^3.5.4",
 		"mongoose": "^5.9.2"
 	},
+	"devDependencies": {
+    "jest": "^25.2.7"
+  },
 	"engines": {
 		"node": "12.16.0"
 	},
