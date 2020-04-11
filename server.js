@@ -4,12 +4,9 @@ const port = process.env.PORT || 3001;
 const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const dns = require("dns");
 
-const {
-  urlValidityChecker,
-  isValidUrlFormat,
-  getUrlHost,
-} = require("./util/helpers");
+const { isValidUrlFormat, getUrlHost } = require("./util/helpers");
 require("dotenv").config();
 
 mongoose
@@ -18,7 +15,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => console.log("Database Connected"))
-  .catch((err) => console.err(err));
+  .catch((err) => console.log(err));
 
 app.use(cors({ optionSuccessStatus: 200 }));
 app.use(express.static("public"));
@@ -38,13 +35,21 @@ const Url = mongoose.model("Url", {
 });
 
 // app.get('/kill', async (req, res) =>{
-//   await Url.deleteOne({ short_url: 5 })
+//   await Url.deleteOne({ short_url: 11 })
+//   await Url.deleteOne({ short_url: 12 })
+//   await Url.deleteOne({ short_url: 13 })
+//   await Url.deleteOne({ short_url: 14 })
+//   await Url.deleteOne({ short_url: 15 })
+//   await Url.deleteOne({ short_url: 16 })
+//   await Url.deleteOne({ short_url: 17 })
+//   await Url.deleteOne({ short_url: 18 })
+//   await Url.deleteOne({ short_url: 19 })
+//   await Url.deleteOne({ short_url: 20 })
 //   Url.find({})
 //     .then((urls) => console.log(urls, urls.length))
 //     .catch((e) => console.log(e));
 // })
 
-// And saving the instance on the db
 app.get("/", (req, res) => {
   Url.find({})
     .then((urls) => console.log(urls, urls.length))
@@ -52,44 +57,42 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
-app.post("/api/shorturl/new", async (req, res) => {
+app.post("/api/shorturl/new", (req, res) => {
   const enteredUrl = req.body.url;
-  if (!isValidUrlFormat(enteredUrl)) return res.json({ Error: "Invalid format" });
-  console.log("is Valid?: ", urlValidityChecker(enteredUrl))
-  if (urlValidityChecker(enteredUrl) !== "valid url")  return res.json({ Error: "Url doesn't exist" });
-  try {
-    const entries = await Url.find({});
-    const numberOfEntries = entries.length;
-    const postedUrl = await Url.find({ original_url: enteredUrl });
-    if (postedUrl.length > 0) {
-      res.send(postedUrl);
-    } else {
-      const newEntry = {
-        original_url: enteredUrl,
-        short_url: numberOfEntries + 1,
-      };
-      await Url.create(newEntry);
-      res.send(newEntry);
+  if (!isValidUrlFormat(enteredUrl)) return res.json({ Error: "Invalid URL" });
+  dns.lookup(getUrlHost(enteredUrl), async err => {
+    try {
+      if (!err) {
+        const entries = await Url.find({});
+        const numberOfEntries = entries.length;
+        const postedUrl = await Url.find({ original_url: enteredUrl });
+        if (postedUrl.length > 0) {
+          const { original_url, short_url } = postedUrl[0];
+          return res.json({original_url, short_url});
+        } else {
+          const newEntry = {
+            original_url: enteredUrl,
+            short_url: numberOfEntries + 1,
+          };
+          await Url.create(newEntry);
+          return res.json(newEntry);
+        }
+      } else {
+        res.json({ error: "invalid Hostname" });
+      }
+    } catch (e) {
+      res.redirect("/");
+      console.err(e);
     }
-  } catch (e) {
-    res.redirect("/");
-    console.log(e);
-  }
+  });
 });
 
-app.get("/gogo", (req, res) => {
-  Url.find({ original_url: "www.google.com" })
-    .then((url) => {
-      if (url.length > 0) {
-        res.send(url);
-      } else {
-        res.send("Shit aint found");
-      }
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-});
+app.get("/api/getall", async (req, res) => {
+  await Url.find({})
+    .then((urls) => console.log(urls, urls.length))
+    .catch((e) => console.log(e));
+  res.send("Check your console")
+})
 
 /*
 
