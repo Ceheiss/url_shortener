@@ -82,4 +82,8 @@ app.get("/api/shorturl/:shortUrl", async (req, res) => {
   }
 });
 
+app.get("/*", (req, res) => {
+  res.sendFile(__dirname + "/views/404.html");
+})
+
 app.listen(port, () => console.log(`Your app is listening on port ${port}`));

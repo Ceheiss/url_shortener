@@ -1,15 +1,14 @@
-const dns = require("dns");
-
-
- 
 const isValidUrlFormat = (url) => {
   const regex = /https?:\/\/www.*.[a-z]\/?.*/gi;
   return regex.test(url);
 };
 
 const getUrlHost = (url) => {
-  const regex = /https?:\/\/www\./gi;
-  return url.split(regex)[1];
+  const initialPartRegex = /https?:\/\//gi;
+  const endingPartRegex = /\//gi;
+  const firstPartOff = url.split(initialPartRegex)[1];
+  const appendPartOff = firstPartOff.split(endingPartRegex)[0];
+  return appendPartOff;
 };
 
-module.exports = {  isValidUrlFormat, getUrlHost };
+module.exports = { isValidUrlFormat, getUrlHost };

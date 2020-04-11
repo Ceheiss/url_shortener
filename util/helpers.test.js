@@ -29,6 +29,6 @@ it("should return true when given a correctly formatted url with http", () => {
 
 it("should return the host of the url without the http(s) protocol", () => {
   const result = getUrlHost("https://www.google.com");
-  const expected = "google.com";
+  const expected = "www.google.com";
   expect(result).toBe(expected);
 });
