@@ -34,22 +34,7 @@ const Url = mongoose.model("Url", {
   },
 });
 
-// app.get('/kill', async (req, res) =>{
-//   await Url.deleteOne({ short_url: 11 })
-//   await Url.deleteOne({ short_url: 12 })
-//   await Url.deleteOne({ short_url: 13 })
-//   await Url.deleteOne({ short_url: 14 })
-//   await Url.deleteOne({ short_url: 15 })
-//   await Url.deleteOne({ short_url: 16 })
-//   await Url.deleteOne({ short_url: 17 })
-//   await Url.deleteOne({ short_url: 18 })
-//   await Url.deleteOne({ short_url: 19 })
-//   await Url.deleteOne({ short_url: 20 })
-//   Url.find({})
-//     .then((urls) => console.log(urls, urls.length))
-//     .catch((e) => console.log(e));
-// })
-
+// Routes
 app.get("/", (req, res) => {
   Url.find({})
     .then((urls) => console.log(urls, urls.length))
@@ -60,7 +45,7 @@ app.get("/", (req, res) => {
 app.post("/api/shorturl/new", (req, res) => {
   const enteredUrl = req.body.url;
   if (!isValidUrlFormat(enteredUrl)) return res.json({ Error: "Invalid URL" });
-  dns.lookup(getUrlHost(enteredUrl), async err => {
+  dns.lookup(getUrlHost(enteredUrl), async (err) => {
     try {
       if (!err) {
         const entries = await Url.find({});
@@ -68,7 +53,7 @@ app.post("/api/shorturl/new", (req, res) => {
         const postedUrl = await Url.find({ original_url: enteredUrl });
         if (postedUrl.length > 0) {
           const { original_url, short_url } = postedUrl[0];
-          return res.json({original_url, short_url});
+          return res.json({ original_url, short_url });
         } else {
           const newEntry = {
             original_url: enteredUrl,
@@ -87,64 +72,14 @@ app.post("/api/shorturl/new", (req, res) => {
   });
 });
 
-app.get("/api/getall", async (req, res) => {
-  await Url.find({})
-    .then((urls) => console.log(urls, urls.length))
-    .catch((e) => console.log(e));
-  res.send("Check your console")
-})
-
-/*
-
-
-// Routes
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/views/index.html");
+app.get("/api/shorturl/:shortUrl", async (req, res) => {
+  const shortUrl = Number(req.params.shortUrl);
+  const shortUrlRedirection = await Url.find({ short_url: shortUrl });
+  if (shortUrlRedirection.length > 0) {
+    res.redirect(shortUrlRedirection[0].original_url);
+  } else {
+    res.json({ error: "No short url found for given input" });
+  }
 });
-
-app.get("/reader", (req, res) => {
-  Url.find({}, (err, urls) => {
-    if (err) {
-      console.log(err);
-    } else {
-      res.render("index", { urls });
-    }
-  });
-});
-
-app.get("/api/shorturl", (req, res) => {
-  // redirects to the values it has
-  res.send("hola");
-});
-
-app.post("/api/shorturl/new", (req, res) => {
-  // create a new url or read a current one
-  Url.create(req.body.url, (err, newUrl) => {
-    if (err) {
-      res.send("ERRROORROROORORORORORORO");
-    } else {
-      // then, redirect to the index
-      res.redirect("/api");
-    }
-  });
-});
-*/
 
 app.listen(port, () => console.log(`Your app is listening on port ${port}`));
-
-/*
-A URL shortener works because of a Web server function called a “Redirect” (URL redirection). Basically the new URL (the short URL) will redirect users to the old URL (your long URL).  When you enter a URL a browser, this actually sends an HTTP command to the Web server directing it to fetch and transmit the requested Web page.
-
-When I receive a url
-  I check if it's a valid URL
-    If it is 
-      I check if I have it, if I do, I return the value for it.
-      If i don't I save it into my db and return the value for it/
-    If it's not throw an error
-
-I can POST a URL to [project_url]/api/shorturl/new and I will receive a shortened URL in the JSON response.
-Example : {"original_url":"www.google.com","short_url":1}
-If I pass an invalid URL that doesn't follow the http(s)://www.example.com(/more/routes) format, the JSON response will contain an error like {"error":"invalid URL"}
-HINT: to be sure that the submitted url points to a valid site you can use the function dns.lookup(host, cb) from the dns core module.
-When I visit the shortened URL, it will redirect me to my original link.
-*/

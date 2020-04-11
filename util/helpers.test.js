@@ -1,14 +1,7 @@
 const {
-  urlValidityChecker,
   isValidUrlFormat,
   getUrlHost,
 } = require("./helpers");
-
-xit("should return 'valid url' when given a valid url", () => {
-  const result = urlValidityChecker("google.com");
-  const expected = "google.com is valid url";
-  expect(result).toBe(expected);
-});
 
 it("should return false when given a wrong http protocol", () => {
   const result = isValidUrlFormat("hds://www.google.com");
