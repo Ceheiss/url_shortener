@@ -17,7 +17,7 @@
 		"mongoose": "^5.9.2"
 	},
 	"engines": {
-		"node": "12.16.2"
+		"node": "12.16.0"
 	},
 	"repository": {
 		"type": "git"
