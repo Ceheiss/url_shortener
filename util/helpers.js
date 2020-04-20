@@ -1,5 +1,5 @@
 const isValidUrlFormat = (url) => {
-  const regex = /https?:\/\/www.*.[a-z]\/?.*/gi;
+  const regex = /https?:\/\/w?w?w?.*.[a-z]\/?.*/gi;
   return regex.test(url);
 };
 
