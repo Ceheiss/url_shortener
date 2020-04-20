@@ -44,7 +44,10 @@ app.get("/", (req, res) => {
 
 app.post("/api/shorturl/new", (req, res) => {
   const enteredUrl = req.body.url;
-  if (!isValidUrlFormat(enteredUrl)) return res.json({ Error: "Invalid URL" });
+  if (!isValidUrlFormat(enteredUrl)) {
+    res.status(400);
+    return res.json({ Error: "Invalid URL" });
+  } 
   dns.lookup(getUrlHost(enteredUrl), async (err) => {
     try {
       if (!err) {
@@ -63,9 +66,11 @@ app.post("/api/shorturl/new", (req, res) => {
           return res.json(newEntry);
         }
       } else {
+        res.status(400);
         res.json({ error: "invalid Hostname" });
       }
     } catch (e) {
+      res.status(500);
       res.redirect("/");
       console.err(e);
     }
